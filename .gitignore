@@ -1,0 +1,39 @@
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+
+# Local editor settings
+.vscode/
+.idea/
+
+# Course materials kept local
+*.pdf
+
+# Generated outputs
+scripts/*.png
+scripts/*.jpg
+scripts/*.jpeg
+scripts/*.svg
+scripts/*.gif
+figures/
+outputs/
+results/
+runs/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
