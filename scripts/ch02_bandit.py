@@ -84,6 +84,39 @@ class DecayingEpsilonGreedy(Solver):
 
         return arm
 
+class UCB(Solver):
+    def __init__(self, bandit, coef, init_prob=1.0):
+        super(UCB, self).__init__(bandit)
+        self.total_count = 0
+        self.estimates = np.array([init_prob] * self.bandit.num_arms)
+        self.coef = coef
+
+    def run_one_step(self):
+        self.total_count += 1
+        ucb = self.estimates + self.coef * np.sqrt(np.log(self.total_count) / (2 * (self.counts + 1)))
+        arm = np.argmax(ucb)
+        r = self.bandit.step(arm)
+        self.estimates[arm] += 1.0 / (self.counts[arm] + 1) * (r - self.estimates[arm])
+
+        return arm
+
+class ThompsonSampling(Solver):
+    """Sample each arm's success probability from its Beta posterior."""
+
+    def __init__(self, bandit):
+        super(ThompsonSampling, self).__init__(bandit)
+        self._a = np.ones(self.bandit.num_arms)
+        self._b = np.ones(self.bandit.num_arms)
+
+    def run_one_step(self):
+        samples = np.random.beta(self._a, self._b)
+        arm = np.argmax(samples)
+        r = self.bandit.step(arm)
+
+        self._a[arm] += r
+        self._b[arm] += (1 - r)
+        return arm
+
 
 def plot_results(solvers, solver_names, output_path):
     for solver, name in zip(solvers, solver_names):
@@ -115,11 +148,15 @@ def main():
 
     solvers = [
         run_solver(EpsilonGreedy, bandit, num_steps, seed, epsilon=0.01),
-        run_solver(DecayingEpsilonGreedy, bandit, num_steps, seed)
+        run_solver(DecayingEpsilonGreedy, bandit, num_steps, seed),
+        run_solver(UCB, bandit, num_steps, seed, coef = 1),
+        run_solver(ThompsonSampling, bandit, num_steps, seed)
     ]
     solver_names = [
         "epsilon=0.01",
-        "decaying epsilon"
+        "decaying epsilon",
+        "UCB",
+        "Thompson sanpling"
     ]
     for name, solver in zip(solver_names, solvers):
         print(f"{name} 的累积懊悔为: {solver.regret:.4f}")
