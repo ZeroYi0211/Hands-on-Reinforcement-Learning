@@ -20,7 +20,7 @@ class BernoulliBandit:
         self.num_arms = num_arms
 
     def step(self, k):
-        if np.random.rand() < self.probs[k]:
+        if np.random.random() < self.probs[k]:
             return 1
         else:
             return 0
